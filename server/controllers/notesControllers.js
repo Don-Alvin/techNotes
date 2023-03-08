@@ -2,11 +2,11 @@ const Note = require("../models/Note");
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 
-// @desc Read all notes
+// @desc Get all notes
 // @route GET /notes
 // @access Private
 const getAllNotes = asyncHandler(async (req, res) => {
-	// get all notes from MongoDB
+	// Get all notes from MongoDB
 	const notes = await Note.find().lean();
 
 	// If no notes
@@ -29,6 +29,7 @@ const getAllNotes = asyncHandler(async (req, res) => {
 // @route POST /notes
 // @access Private
 const createNewNote = asyncHandler(async (req, res) => {
+	console.log("notes");
 	const { user, title, text } = req.body;
 
 	// Confirm data
@@ -37,19 +38,23 @@ const createNewNote = asyncHandler(async (req, res) => {
 	}
 
 	// Check for duplicate title
-	const duplicate = await Note.findOne({ title }).lean().exec();
+	const duplicate = await Note.findOne({
+		title: { $regex: new RegExp(`^${title}$`, "i") },
+	})
+		.lean()
+		.exec();
 
 	if (duplicate) {
-		return res.status(409).json({ message: "Duplicate note file" });
+		return res.status(409).json({ message: "Duplicate note title" });
 	}
 
 	// Create and store the new note
 	const note = await Note.create({ user, title, text });
 
 	if (note) {
-		return res.status(201).json({ message: "New note created" });
+		return res.status(201).json(note);
 	} else {
-		return res.status(400).json({ message: "Invalid note data recieved" });
+		return res.status(400).json({ message: "Invalid note data received" });
 	}
 });
 
@@ -57,14 +62,14 @@ const createNewNote = asyncHandler(async (req, res) => {
 // @route PATCH /notes
 // @access Private
 const updateNote = asyncHandler(async (req, res) => {
-	const { user, title, text, completed } = req.body;
+	const { id, user, title, text, completed } = req.body;
 
 	// Confirm data
-	if (!data || !user || !title || !text || typeof completed !== "boolean") {
-		return res.status(400).json({ message: "All field are required" });
+	if (!id || !user || !title || !text || typeof completed !== "boolean") {
+		return res.status(400).json({ message: "All fields are required" });
 	}
 
-	// Confirm notes exists to update
+	// Confirm note exists to update
 	const note = await Note.findById(id).exec();
 
 	if (!note) {
@@ -75,7 +80,6 @@ const updateNote = asyncHandler(async (req, res) => {
 	const duplicate = await Note.findOne({ title }).lean().exec();
 
 	// Allow renaming of the original note
-
 	if (duplicate && duplicate?._id.toString() !== id) {
 		return res.status(409).json({ message: "Duplicate note title" });
 	}
@@ -90,7 +94,7 @@ const updateNote = asyncHandler(async (req, res) => {
 	res.json(`'${updatedNote.title}' updated`);
 });
 
-// @desc delete a note
+// @desc Delete a note
 // @route DELETE /notes
 // @access Private
 const deleteNote = asyncHandler(async (req, res) => {
@@ -115,4 +119,9 @@ const deleteNote = asyncHandler(async (req, res) => {
 	res.json(reply);
 });
 
-module.exports = { getAllNotes, createNewNote, updateNote, deleteNote };
+module.exports = {
+	getAllNotes,
+	createNewNote,
+	updateNote,
+	deleteNote,
+};
