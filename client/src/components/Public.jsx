@@ -5,12 +5,12 @@ const Public = () => {
   return (
     <section className="public">
         <header>
-            <h1>Welcome to <span className="nowrap">Dan D. Repairs!</span></h1>
+            <h1>Welcome to <span className="nowrap">Tech Garage!</span></h1>
         </header>
         <main className="public__main">
-            <p>Located at the center of CBD in Naiorbi, Dan D. Repairs  provides a trained staff ready to meet your tech repair needs.</p>
+            <p>Located at the center of CBD in Nairobi, Tech Garage  provides a trained staff ready to meet your tech repair needs.</p>
             <address className="public__addr">
-                Dan D. Repairs<br />
+                Tech Garage<br />
                 Kimathi Street<br />
                 Kimathi House<br />
                 <a href="tel:+254712345678">(+254) 712-345-678</a>
